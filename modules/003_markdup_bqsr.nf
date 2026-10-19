@@ -50,9 +50,13 @@ process BQSR {
 	
 
 	script:
-	"""
 	
-	VerifyBamID \\
+	def mills_vcf = mills.find { it.name =~ /\.(vcf|vcf\.gz)$/ }
+	def dbsnp_vcf = dbsnp.find { it.name =~ /\.(vcf|vcf\.gz)$/ }
+	def kg_vcf = kg.find { it.name =~ /\.(vcf|vcf\.gz)$/ }
+	
+	"""
+	verifybamid2 \\
 	--SVDPrefix 1000g.phase3.100k.b38.vcf.gz.dat \\
 	--Reference ${ref} \\
 	--BamFile ${bam} \\
@@ -75,9 +79,9 @@ process BQSR {
 	--OUTPUT ${sample_id}.crosscheck_metrics
 		
 	gatk BaseRecalibrator -I ${bam} -R ${ref} \\
-	--known-sites ${mills[0]} \\
-	--known-sites ${dbsnp[0]} \\
-	--known-sites ${kg[0]} \\
+	--known-sites ${mills_vcf} \\
+	--known-sites ${dbsnp_vcf} \\
+	--known-sites ${kg_vcf} \\
 	-O ${sample_id}.recal.table
 
 	gatk ApplyBQSR -I ${bam} -R ${ref} \\
@@ -89,9 +93,9 @@ process BQSR {
 
 	## Generate the covariate table after applying BQSR
 	gatk BaseRecalibrator -I ${sample_id}.recal.bam -R ${ref} \\
-	--known-sites ${mills[0]} \\
-	--known-sites ${dbsnp[0]} \\
-	--known-sites ${kg[0]} \\
+	--known-sites ${mills_vcf} \\
+	--known-sites ${dbsnp_vcf} \\
+	--known-sites ${kg_vcf} \\
 	-O ${sample_id}.after.recal.table
 
 

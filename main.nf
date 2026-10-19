@@ -42,8 +42,16 @@ workflow {
                 .map { id, gvcf, tbi -> "${id}\t${gvcf}" }                
 		.collectFile(name: 'cohort.sample_map', newLine: true)
 		.collect()
-        
-	db_ch = GENOMICSDB_IMPORT(sample_map_ch, scatter_ch)
+
+	// Getting existing genomicsdb
+	gendb_ch = Channel
+		.fromPath("${params.gendb}/genomicsdb_*", type: 'dir')
+		.map { d -> 
+			def real = d.toRealPath()
+			tuple(d.name.replaceFirst(/^genomicsdb_/, ''), real.toString())}
+
+	        
+	db_ch = GENOMICSDB_IMPORT(sample_map_ch, gendb_ch)
         // geno_ch = GENOTYPE_GVCFS(db_ch, ref_ch, ref_index_ch, ref_dict_ch)
 
 }

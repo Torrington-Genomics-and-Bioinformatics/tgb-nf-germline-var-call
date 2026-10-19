@@ -16,7 +16,7 @@ process BWA_MEM {
 	# Prepare RG info
 	LB="${sample_id}_lib1"
 	PL="ILLUMINA"
-	FLOWCELL_LANE=\$(gzcat ${fastq1} | head -1 | gcut -d: -f3,4 --output-delimiter=".")
+	FLOWCELL_LANE=\$(zcat ${fastq1} | head -1 | cut -d: -f3,4 --output-delimiter=".")
 
 	# Run alignment while adding read groups 
 	bwa mem \\

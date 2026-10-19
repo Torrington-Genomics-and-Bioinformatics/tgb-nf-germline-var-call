@@ -1,26 +1,25 @@
 process GENOMICSDB_IMPORT {
 
 
-	tag "interval:$interval.baseName"
-	publishDir "${params.outdir}/genomicsdb", mode: 'symlink'	
+	tag "interval:${name}"	
 
 	
 	input:
 	path sample_map
-	path interval
+	tuple val(name), val(gendb)
 
 	output:
-	tuple val(interval.baseName), path("genomicsdb_${interval.baseName}")
+	tuple val(name), val(gendb)
 	
 	script:
 	"""
 	
+	DB="${gendb}"
+
 	gatk GenomicsDBImport \\
 	--sample-name-map ${sample_map} \\
-	--genomicsdb-workspace-path genomicsdb_${interval.baseName} \\
-	--merge-input-intervals \\
+	--genomicsdb-update-workspace-path "\$DB" \\
 	--batch-size 50 \\
-	-L ${interval} \\
 	--reader-threads ${task.cpus}
 
 	"""
