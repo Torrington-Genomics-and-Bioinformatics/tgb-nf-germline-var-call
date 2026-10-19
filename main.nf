@@ -37,21 +37,22 @@ workflow {
         recal_ch = BQSR(dedup_ch, ref_ch, ref_index_ch, ref_dict_ch, dat_ch, map_ch, kg_ch, mills_ch, dbsnp_ch)
         gvcf_ch = HAPLOTYPE_CALLER(recal_ch.bam, ref_ch, ref_index_ch, ref_dict_ch, int_ch)
         
-	// Getting the sample map for joint genotyping 
-	sample_map_ch = gvcf_ch
-                .map { id, gvcf, tbi -> "${id}\t${gvcf}" }                
-		.collectFile(name: 'cohort.sample_map', newLine: true)
-		.collect()
-
-	// Getting existing genomicsdb
-	gendb_ch = Channel
-		.fromPath("${params.gendb}/genomicsdb_*", type: 'dir')
-		.map { d -> 
-			def real = d.toRealPath()
-			tuple(d.name.replaceFirst(/^genomicsdb_/, ''), real.toString())}
-
-	        
-	db_ch = GENOMICSDB_IMPORT(sample_map_ch, gendb_ch)
+	// [benchmark clone] GenomicsDB import disabled; gVCFs get imported into the main DB later
+//	// Getting the sample map for joint genotyping 
+//	sample_map_ch = gvcf_ch
+//                .map { id, gvcf, tbi -> "${id}\t${gvcf}" }                
+//		.collectFile(name: 'cohort.sample_map', newLine: true)
+//		.collect()
+//
+//	// Getting existing genomicsdb
+//	gendb_ch = Channel
+//		.fromPath("${params.gendb}/genomicsdb_*", type: 'dir')
+//		.map { d -> 
+//			def real = d.toRealPath()
+//			tuple(d.name.replaceFirst(/^genomicsdb_/, ''), real.toString())}
+//
+//	        
+//	db_ch = GENOMICSDB_IMPORT(sample_map_ch, gendb_ch)
         // geno_ch = GENOTYPE_GVCFS(db_ch, ref_ch, ref_index_ch, ref_dict_ch)
 
 }

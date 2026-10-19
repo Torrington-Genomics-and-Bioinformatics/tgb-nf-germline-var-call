@@ -1,7 +1,7 @@
 process HAPLOTYPE_CALLER {
 
 	tag "$sample_id"
-	publishDir "${params.outdir}/gvcfs", mode: 'symlink'
+	publishDir "${params.outdir}/gvcfs", mode: 'copy'
 
 	input:
 	tuple val(sample_id), path(bam), path(bai), path(fmt)
@@ -19,7 +19,7 @@ process HAPLOTYPE_CALLER {
 	
 	fm=\$(cat ${fmt})
 	
-	gatk HaplotypeCaller -I ${bam} -R ${ref} \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" HaplotypeCaller -I ${bam} -R ${ref} \\
 	-L ${intervals} \\
 	-ip 100 \\
 	-contamination \${fm} \\

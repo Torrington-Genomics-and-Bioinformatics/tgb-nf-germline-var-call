@@ -1,7 +1,6 @@
 process BWA_MEM {
 	
 	tag "$sample_id"
-	publishDir "${params.outdir}/aligned", mode: 'symlink'
 
 	input:
 	tuple val(sample_id), path(fastq1), path(fastq2)
@@ -19,7 +18,7 @@ process BWA_MEM {
 	FLOWCELL_LANE=\$(zcat ${fastq1} | head -1 | cut -d: -f3,4 --output-delimiter=".")
 
 	# Run alignment while adding read groups 
-	bwa mem \\
+	bwa mem -t ${task.cpus} \\
 	-K 10000000 -Y \\
 	-R "@RG\\tID:\${FLOWCELL_LANE}\\tSM:${sample_id}\\tLB:\${LB}\\tPL:\${PL}\\tPU:\${FLOWCELL_LANE}" \\
 	${ref} \\

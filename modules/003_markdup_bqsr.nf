@@ -11,7 +11,7 @@ process MARK_DUPLICATES {
 	script:
 	"""
 	
-	gatk MarkDuplicates -I ${bam} \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" MarkDuplicates -I ${bam} \\
 	--OPTICAL_DUPLICATE_PIXEL_DISTANCE 2500 \\
 	-O ${sample_id}.dedup.bam \\
 	-M ${sample_id}.metrics.txt
@@ -27,7 +27,7 @@ process BQSR {
 	
 	tag "$sample_id"
 	debug true
-	publishDir ("${params.outdir}/bqsr"), mode: 'symlink'
+	publishDir ("${params.outdir}/bqsr"), mode: 'copy'
 
 	input:
 	tuple val(sample_id), path(bam), path(bai)
@@ -71,20 +71,20 @@ process BQSR {
 	echo "##########"
 	echo "FM value: ###  \${fm}"
 
-	gatk CrosscheckFingerprints \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" CrosscheckFingerprints \\
 	--INPUT ${bam} \\
 	--HAPLOTYPE_MAP ${map} \\
 	--LOD_THRESHOLD -20.0 \\
 	--CROSSCHECK_BY READGROUP \\
 	--OUTPUT ${sample_id}.crosscheck_metrics
 		
-	gatk BaseRecalibrator -I ${bam} -R ${ref} \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" BaseRecalibrator -I ${bam} -R ${ref} \\
 	--known-sites ${mills_vcf} \\
 	--known-sites ${dbsnp_vcf} \\
 	--known-sites ${kg_vcf} \\
 	-O ${sample_id}.recal.table
 
-	gatk ApplyBQSR -I ${bam} -R ${ref} \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" ApplyBQSR -I ${bam} -R ${ref} \\
 	--bqsr-recal-file ${sample_id}.recal.table \\
 	--static-quantized-quals 10 --static-quantized-quals 20 --static-quantized-quals 30 \\
 	-O ${sample_id}.recal.bam
@@ -92,7 +92,7 @@ process BQSR {
 	samtools index ${sample_id}.recal.bam
 
 	## Generate the covariate table after applying BQSR
-	gatk BaseRecalibrator -I ${sample_id}.recal.bam -R ${ref} \\
+	gatk --java-options "-Xmx${task.memory.toGiga() - 1}g" BaseRecalibrator -I ${sample_id}.recal.bam -R ${ref} \\
 	--known-sites ${mills_vcf} \\
 	--known-sites ${dbsnp_vcf} \\
 	--known-sites ${kg_vcf} \\
