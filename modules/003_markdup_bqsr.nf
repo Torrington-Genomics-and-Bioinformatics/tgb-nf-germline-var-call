@@ -1,12 +1,14 @@
 process MARK_DUPLICATES {
 	
 	tag "$sample_id"
+	publishDir "${params.outdir}/qc", mode: 'copy', pattern: '*.metrics.txt'
 	
 	input:
 	tuple val(sample_id), path(bam), path(bai)
 
 	output:
-	tuple val(sample_id), path("${sample_id}.dedup.bam"), path("${sample_id}.dedup.bam.bai")
+	tuple val(sample_id), path("${sample_id}.dedup.bam"), path("${sample_id}.dedup.bam.bai"), emit: bam
+	path("${sample_id}.metrics.txt"), emit: metrics
 
 	script:
 	"""

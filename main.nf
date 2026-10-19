@@ -31,9 +31,9 @@ workflow {
 
         
         // 3. Wire processes using channels
-	qc_ch = QC(reads_ch)
+	qc_ch = QC(reads_ch).reads
         aligned_ch = BWA_MEM(qc_ch, ref_ch, ref_index_ch)
-        dedup_ch = MARK_DUPLICATES(aligned_ch)
+        dedup_ch = MARK_DUPLICATES(aligned_ch).bam
         recal_ch = BQSR(dedup_ch, ref_ch, ref_index_ch, ref_dict_ch, dat_ch, map_ch, kg_ch, mills_ch, dbsnp_ch)
         gvcf_ch = HAPLOTYPE_CALLER(recal_ch.bam, ref_ch, ref_index_ch, ref_dict_ch, int_ch)
         
