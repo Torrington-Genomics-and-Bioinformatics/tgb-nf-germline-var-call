@@ -10,6 +10,7 @@ are marked **(calls)**; the rest only change resources, file handling or which o
 | `v2.0-batch` | GCP Spot batch workers | benchmark run + batch b01 |
 | `v2.1-batch-qc` | GCP Spot batch workers | batches b02–b19 |
 | `v3.0-multilane` | GCP Spot batch workers | batches b20–b49 |
+| `v3.1-qc` | GCP Spot batch workers | from batch b120 |
 
 ## v0-imac
 Original pipeline. macOS `gzcat`/`gcut`; VerifyBamID built from source; GenomicsDBImport creating one
@@ -38,3 +39,16 @@ samtools 1.21, fastp 1.1.0).
 - **(calls, multi-lane samples only)** one read group per flowcell-lane: each read gets the read group
   of its own lane (ID = PU = flowcell.lane, same SM and LB). Single-lane samples run the unchanged
   command. BQSR then models each lane; CrosscheckFingerprints (BY READGROUP) checks the lanes agree.
+
+## v3.1-qc
+QC only; no change to the BAM, the gVCF or any call.
+- `SAMPLE_QC` (new, per sample, on the recalibrated BAM): GATK CollectHsMetrics on the run's target
+  intervals (bait = target), with per-target coverage; samtools stats.
+- `BATCH_QC` (new, once per run): `bin/batch_qc.py` builds `qc/batch_qc.tsv` (one row per sample, with
+  pass / review / FAIL and the reasons) and `qc/batch_qc_report.html`; MultiQC writes `qc/multiqc_report.html`.
+  The table combines fastp, MarkDuplicates, CollectHsMetrics (coverage, on-target, fold-80, AT/GC dropout),
+  samtools stats, VerifyBamID2 FREEMIX, CrosscheckFingerprints by read group, BQSR before/after error
+  (RMSE of reported vs empirical quality) and a genetic sex check (chrX and chrY target coverage relative
+  to the autosomes, PAR excluded). Thresholds are listed in the script and the report.
+- BQSR process: its outputs are now named channels (no change to the commands).
+- `PIPELINE_VERSION` file; `params.pipeline_version`.

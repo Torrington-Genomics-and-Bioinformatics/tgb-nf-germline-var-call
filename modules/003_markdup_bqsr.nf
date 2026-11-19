@@ -44,11 +44,11 @@ process BQSR {
 
 	output:
 	tuple val(sample_id), path("${sample_id}.recal.bam"), path("${sample_id}.recal.bam.bai"), path("fm.txt"), emit: bam
-	path "${sample_id}.selfSM" 
+	path "${sample_id}.selfSM", emit: selfsm
 	path "${sample_id}.Ancestry"
-	path "${sample_id}.crosscheck_metrics"
-	path "${sample_id}.recal.table"
-	path "${sample_id}.after.recal.table"
+	path "${sample_id}.crosscheck_metrics", emit: crosscheck
+	path "${sample_id}.recal.table", emit: recal_before
+	path "${sample_id}.after.recal.table", emit: recal_after
 	
 
 	script:
