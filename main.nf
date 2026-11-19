@@ -3,6 +3,7 @@ include { BWA_MEM } from './modules/002_align.nf'
 include { MARK_DUPLICATES; BQSR} from './modules/003_markdup_bqsr.nf'
 include { HAPLOTYPE_CALLER } from './modules/004_var_calling.nf'
 include { GENOMICSDB_IMPORT } from './modules/005_gendbimp.nf'
+include { SAMPLE_QC; BATCH_QC } from './modules/007_qc.nf'
 //include { GENOTYPE_GVCFS; MERGE } from './modules/006_joint_genotyping.nf'
 
 
@@ -36,6 +37,14 @@ workflow {
         dedup_ch = MARK_DUPLICATES(aligned_ch).bam
         recal_ch = BQSR(dedup_ch, ref_ch, ref_index_ch, ref_dict_ch, dat_ch, map_ch, kg_ch, mills_ch, dbsnp_ch)
         gvcf_ch = HAPLOTYPE_CALLER(recal_ch.bam, ref_ch, ref_index_ch, ref_dict_ch, int_ch)
+
+	// v3.1-qc: alignment QC per sample, then one QC table + report for the run
+	sqc_ch = SAMPLE_QC(recal_ch.bam, ref_ch, ref_index_ch, ref_dict_ch, int_ch)
+	qc_files_ch = QC.out.report.flatten()
+		.mix(MARK_DUPLICATES.out.metrics, BQSR.out.selfsm, BQSR.out.crosscheck,
+		     BQSR.out.recal_before, BQSR.out.recal_after, sqc_ch.files.flatten())
+		.collect()
+	BATCH_QC(qc_files_ch)
         
 	// [benchmark clone] GenomicsDB import disabled; gVCFs get imported into the main DB later
 //	// Getting the sample map for joint genotyping 

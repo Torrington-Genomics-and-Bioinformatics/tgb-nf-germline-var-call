@@ -9,6 +9,9 @@ VerifyBamID2 contamination + CrosscheckFingerprints → BaseRecalibrator/ApplyBQ
 HaplotypeCaller `-ERC GVCF` on the Celemics targets (±100 bp) with the VerifyBamID2 FREEMIX as
 `-contamination`. Joint genotyping (GenomicsDBImport + GenotypeGVCFs) is run separately on the cohort.
 
+From v3.1-qc each run also writes alignment QC per sample (CollectHsMetrics on the targets, samtools stats)
+and one QC table and report for the run: `qc/batch_qc.tsv`, `qc/batch_qc_report.html`, `qc/multiqc_report.html`.
+
 ```
 nextflow run . --samplesheet samplesheet.csv --outdir results
 ```
