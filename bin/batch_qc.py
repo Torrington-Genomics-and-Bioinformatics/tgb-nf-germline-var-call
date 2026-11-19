@@ -99,9 +99,10 @@ def sex_check(path):
         return None
     x = cov["chrX"][0] / cov["chrX"][1] / au if cov["chrX"][1] else float("nan")
     y = cov["chrY"][0] / cov["chrY"][1] / au if cov["chrY"][1] else float("nan")
+    # chrY decides (female exomes ~0-0.05, male ~0.3-0.5); chrX in male exomes runs ~0.5-0.75 (capture bias)
     if x > 0.8 and y < 0.1:
         call = "XX"
-    elif 0.35 < x < 0.65 and y > 0.2:
+    elif x < 0.85 and y > 0.2:
         call = "XY"
     else:
         call = "check"
@@ -268,7 +269,7 @@ Fold-80 penalty: how much more sequencing would be needed for 80% of target base
 Contamination: VerifyBamID2 FREEMIX (fraction of reads from another person). Mapped, properly paired, error rate (mismatches per
 mapped base) and insert size: samtools stats on the final BAM. BQSR RMSE: observation-weighted root-mean-square difference between
 reported and empirical base quality, before and after recalibration. Genetic sex: mean target coverage of chrX and chrY (PAR excluded)
-relative to the autosomes (XX: X ≈ 1, Y ≈ 0; XY: X ≈ 0.5, Y &gt; 0.2). Compare it with the recorded sex.
+relative to the autosomes (XX: X &gt; 0.8 and Y &lt; 0.1; XY: X &lt; 0.85 and Y &gt; 0.2; anything else: check). Compare it with the recorded sex.
 Lanes: read groups (flowcell-lanes) in the BAM; lane mismatch: CrosscheckFingerprints between lanes of the same sample.
 Detailed plots: multiqc_report.html in the same folder.</p>
 </body></html>"""
