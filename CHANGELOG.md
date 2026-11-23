@@ -11,6 +11,7 @@ are marked **(calls)**; the rest only change resources, file handling or which o
 | `v2.1-batch-qc` | GCP Spot batch workers | batches b02–b19 |
 | `v3.0-multilane` | GCP Spot batch workers | batches b20–b49 |
 | `v3.1-qc` | GCP Spot batch workers | from batch b120 |
+| `v3.2-singletons` | GCP Spot batch workers | samples re-made from BAMs (not yet run) |
 
 ## v0-imac
 Original pipeline. macOS `gzcat`/`gcut`; VerifyBamID built from source; GenomicsDBImport creating one
@@ -52,3 +53,11 @@ QC only; no change to the BAM, the gVCF or any call.
   to the autosomes, PAR excluded). Thresholds are listed in the script and the report.
 - BQSR process: its outputs are now named channels (no change to the commands).
 - `PIPELINE_VERSION` file; `params.pipeline_version`.
+
+## v3.2-singletons
+- **(calls, only samples with a `fastq_s` column)** optional unpaired reads, e.g. the singletons written
+  when a BAM is converted back to FASTQ and the mate was missing. fastp trims them single-end (same
+  defaults; report `<s>.singletons_fastp.json/html`, not used by the QC table), bwa mem aligns them
+  single-end with the same options (`-K 10000000 -Y`) and read groups, and they go into the same sorted
+  BAM before MarkDuplicates. Lanes are read from R1 and the unpaired reads together.
+- Samples without `fastq_s` get an empty placeholder and the same alignments as v3.1-qc.

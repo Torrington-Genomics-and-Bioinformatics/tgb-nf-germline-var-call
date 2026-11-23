@@ -15,7 +15,8 @@ and one QC table and report for the run: `qc/batch_qc.tsv`, `qc/batch_qc_report.
 ```
 nextflow run . --samplesheet samplesheet.csv --outdir results
 ```
-Sample sheet columns: `sample_id,fastq_1,fastq_2`. Reference, truth sets, targets and interval paths are
+Sample sheet columns: `sample_id,fastq_1,fastq_2`, plus an optional `fastq_s` (v3.2): unpaired reads, e.g. the
+singletons left by a BAM→FASTQ conversion, trimmed single-end and aligned into the same BAM. Reference, truth sets, targets and interval paths are
 set in `nextflow.config` (`params`).
 
 Every version used for production samples is tagged; see [CHANGELOG.md](CHANGELOG.md) and
