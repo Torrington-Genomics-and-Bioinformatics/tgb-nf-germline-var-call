@@ -28,7 +28,9 @@ workflow {
         reads_ch = Channel
                 .fromPath(params.samplesheet)
                 .splitCsv(header: true)
-                .map { row -> tuple(row.sample_id, file(row.fastq_1), file(row.fastq_2)) }
+                .map { row -> tuple(row.sample_id, file(row.fastq_1), file(row.fastq_2),
+                        // v3.2: optional fastq_s = unpaired reads (e.g. singletons from a BAM->FASTQ conversion)
+                        row.fastq_s ? file(row.fastq_s) : file("${projectDir}/assets/NO_SINGLETONS")) }
 
         
         // 3. Wire processes using channels
